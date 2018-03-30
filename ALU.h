@@ -17,7 +17,7 @@ class ALU {
 	T Compliment(T &a) {
 		T N;
 		N.flip();
-		return Add(1, XOr(a, -1)); // Get 2's compliment of a value
+		return Add(1, XOr(a, N)); // Get 2's compliment of a value
 	}
 
 	// Performs a bit comparison between a and b.
