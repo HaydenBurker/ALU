@@ -17,7 +17,7 @@ class ALU {
 	T Compliment(T &a) {
 		T N;
 		N.flip();
-		return Add(1, XOr(a, N)); // Get 2's compliment of a value
+		return Add(1, XOr(a, -1)); // Get 2's compliment of a value
 	}
 
 	// Performs a bit comparison between a and b.
@@ -43,6 +43,16 @@ class ALU {
 public:
 
 	T Add(T a, T b) {
+		bool IsNeg = false;
+		if (a[a.size() - 1] && a != 0)
+			IsNeg = !IsNeg;
+		if (b[b.size() - 1] && b != 0)
+			IsNeg = !IsNeg;
+
+		bool CanOverflow = false;
+		if ((a[a.size() - 1] ^ a[a.size() - 2]) || b[b.size() - 1] ^ b[b.size() - 2])
+			CanOverflow = true;
+
 		T temp = XOr(a, b);
 		b = And(a, b) << 1;
 		a = temp;
@@ -61,6 +71,8 @@ public:
 				}
 			}
 		}
+		if ((a[a.size() - 1] ^ IsNeg) && CanOverflow)
+			throw runtime_error("Overflow Add");
 		return a;
 	}
 
@@ -71,22 +83,27 @@ public:
 	T Multiply(T a, T b) {
 		bool IsNeg = false;
 		if (b[b.size() - 1] && b != 0) { // b < 0
-			IsNeg = true;
+			IsNeg = !IsNeg;
 			b = Compliment(b);
 		}
+		if (a[a.size() - 1] && a != 0)
+			IsNeg = !IsNeg;
 
 		T sum = 0;
 		T mult = 1;
 
 		while (b != 0) {
-			if (b[0])
+			if (b[0]) {
 				sum = Add(sum, a);
+				if (sum[sum.size() - 1] && !IsNeg)
+					throw runtime_error("Overflow");
+			}
 			a = a << 1;
 			b = b >> 1;
 		}
 
-		if (IsNeg)
-			return Compliment(sum);
+		//if (IsNeg)
+			//return Compliment(sum);
 		return sum;
 	}
 	
@@ -94,19 +111,21 @@ public:
 		if (b == 0)
 			throw logic_error("Can't divide by zero!");
 
-		std::bitset<1> IsNeg = false;
+		bool IsNeg = false;
 		if (b[b.size() - 1] && b != 0) { // b > 0
 			b = Compliment(b);
-			IsNeg.flip();
+			IsNeg = !IsNeg;
 		}
 		if (a[a.size() - 1] && a != 0) { // a > 0
 			a = Compliment(a);
-			IsNeg.flip();
+			IsNeg = !IsNeg;
 		}
 
 		T sum = 0;
 		T mult = 1;
 		while (GreaterThan(a, b) > 0) { // Unsigned int comparison: a > b
+			if (b[b.size() - 1] && !IsNeg)
+				throw runtime_error("Overflow");
 			mult = mult << 1;
 			b = b << 1;
 		}
@@ -123,7 +142,7 @@ public:
 			
 		}
 
-		if (IsNeg.all())
+		if (IsNeg)
 			return Compliment(sum);
 		return sum;
 	}
@@ -137,6 +156,8 @@ public:
 		while (!b[b.size() - 1] && b != 0) { // b > 0
 			if (b[0])
 				sum = Multiply(sum, a);
+			//cout << sum << endl;
+			//cout << a << endl;
 			a = Multiply(a, a);
 			b = b >> 1;
 		}
@@ -147,17 +168,19 @@ public:
 		if (b == 0)
 			throw logic_error("Can't divide by zero!");
 
-		bool isNeg = false;
+		bool IsNeg = false;
 		if (b[b.size() - 1] && b != 0) { // b < 0
 			b = Compliment(b);
 		}
 		if (a[a.size() - 1] && a != 0) { // a < 0
-			isNeg = true;
+			IsNeg = true;
 			a = Compliment(a);
 		}
 
 		T mult = 1;
 		while (GreaterThan(a, b) > 0) {
+			if (b[b.size() - 1] && !IsNeg)
+				throw runtime_error("Overflow");
 			mult = mult << 1;
 			b = b << 1;
 		}
@@ -171,7 +194,7 @@ public:
 			mult = mult >> 1;
 		}
 
-		if (isNeg)
+		if (IsNeg)
 			return Compliment(a);
 		return a;
 	}

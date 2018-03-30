@@ -3,6 +3,7 @@
 
 #include <bitset>
 #include <cassert>
+#include <climits>
 #include <string>
 #include <iostream>
 
@@ -14,7 +15,7 @@ int main() {
 
 	// CPU performs operations in ALU and returns value to a register
 	// ex: register[c] = process.Add(register[a], register[b]).to_ullong();
-	const int SIZE = sizeof (int) * 8;
+	const int SIZE = sizeof (int) * CHAR_BIT;
 	ALU<bitset<SIZE>> process;
 	string input1;
 	string input2;
@@ -28,7 +29,6 @@ int main() {
 			num1 = stoi(input1);
 			cin >> input2;
 			num2 = stoi(input2);
-			cout << num1 / num2 << endl;
 
 			int result;
 
