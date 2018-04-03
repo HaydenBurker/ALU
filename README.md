@@ -1,7 +1,8 @@
 # ALU
 
-Simulates the ALU using bit operations.
-Performs the following operations:
+### Simulates the ALU using bit operations.
+
+### Performs the following operations:
 
 * Add
 * Subtract
